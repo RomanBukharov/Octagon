@@ -1,13 +1,32 @@
-from db.db import engine, Base, SessionLocal
-from db import crud, models
+from fastapi import FastAPI
+from sqlalchemy import text
 
-db = SessionLocal()
+from .api import books, categories
+from .db.db import Base, SessionLocal, engine
+from .db import models
 
-print("Категории:")
-categories = db.query(models.Category).all()
-for cat in categories:
-    print(f'{cat.id}: {cat.title}')
-    for book in cat.books:
-        print(f'Книга - {book.title}, описание - {book.description}, цена - {book.price}')
+Base.metadata.create_all(bind=engine)
 
-db.close()
+app = FastAPI(title="Octagon API")
+
+app.include_router(categories.router)
+app.include_router(books.router)
+
+
+@app.get("/")
+def read_root():
+    return {"message": "Octagon API is running"}
+
+
+@app.on_event("startup")
+def startup_check():
+    db = SessionLocal()
+    try:
+        db.execute(text("SELECT 1"))
+    finally:
+        db.close()
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}

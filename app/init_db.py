@@ -1,5 +1,5 @@
-from db.db import SessionLocal, engine, Base
-from db import crud, models
+from .db.db import SessionLocal, engine, Base
+from .db import crud, models
 
 
 Base.metadata.create_all(bind=engine)

@@ -12,6 +12,9 @@ def create_category(db: Session, title: str):
 def get_category(db: Session, category_id: int):
     return db.query(models.Category).filter(models.Category.id == category_id).first()
 
+def get_categories(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Category).offset(skip).limit(limit).all()
+
 def get_category_by_title(db: Session, title: str):
     return db.query(models.Category).filter(models.Category.title == title).first()
 
@@ -47,8 +50,16 @@ def create_book(db: Session, title: str, description: str, price: float, categor
 def get_book(db: Session, book_id: int):
     return db.query(models.Book).filter(models.Book.id == book_id).first()
 
-def get_books(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Book).offset(skip).limit(limit).all()
+def get_books(
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    category_id: int | None = None,
+):
+    query = db.query(models.Book)
+    if category_id is not None:
+        query = query.filter(models.Book.category_id == category_id)
+    return query.offset(skip).limit(limit).all()
 
 def update_book(db: Session, book_id: int, **kwargs):
     book = db.query(models.Book).filter(models.Book.id == book_id).first()
